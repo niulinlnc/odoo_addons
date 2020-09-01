@@ -66,9 +66,8 @@ class Base(models.AbstractModel):
                     [(fname, 'in', self._ids) for fname in fnames]
                 SubModel = self.env[model]
                 sub_models = SubModel.search(domain)
-                sub_model_ids = list(
-                    set(sub_models._ids) -
-                    set(self._context['unlink_in_cascade'].get(model, [])))
+                sub_model_ids = list(set(sub_models._ids) - set(
+                    self._context['unlink_in_cascade'].get(model, [])))
                 if sub_model_ids:
                     self._context['unlink_in_cascade'].setdefault(model, []). \
                         extend(sub_model_ids)
@@ -152,17 +151,6 @@ class Base(models.AbstractModel):
             log = separator.join(map(tools.ustr, diff[field_name]))
             logs.append('<b>%s</b>: %s' % (label, log))
         return logs
-
-    def recompute_fields(self, fnames):
-        for fname in fnames:
-            field = self._fields[fname]
-            if getattr(field, 'store') and getattr(field, 'compute'):
-                self._recompute_todo(field)
-            else:
-                raise UserError(_('%s is not a stored compute/function field')
-                                % fname)
-        self.recompute()
-        return True
 
     @api.model
     def _create_unique_index(self, column, where_clause=None):
